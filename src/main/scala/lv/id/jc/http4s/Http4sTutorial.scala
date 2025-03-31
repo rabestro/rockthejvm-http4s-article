@@ -3,6 +3,7 @@ package lv.id.jc.http4s
 import cats.Monad
 import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits._
+import com.comcast.ip4s.IpLiteralSyntax
 import io.circe.generic.auto._
 import io.circe.syntax._
 import lv.id.jc.http4s.Movie.Actor
@@ -10,6 +11,7 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl._
 import org.http4s.dsl.impl.{OptionalValidatingQueryParamDecoderMatcher, QueryParamDecoderMatcher}
+import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Content-Encoding`
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -123,10 +125,12 @@ object Http4sTutorial extends IOApp {
   private val movieApp = Http4sTutorial.allRoutesComplete[IO]
 
   override def run(args: List[String]): IO[ExitCode] = {
-    BlazeServerBuilder[IO](runtime.compute)
-      .bindHttp(8080, "localhost")
+    EmberServerBuilder
+      .default[IO]
+      .withHost(ipv4"127.0.0.1") //or your host.
+      .withPort(port"8080")
       .withHttpApp(movieApp)
-      .resource
+      .build
       .use(_ => IO.never)
       .as(ExitCode.Success)
   }

@@ -11,7 +11,7 @@ lazy val root = (project in file("."))
  * val Http4sVersion = "1.0.0-M21"
  * val CirceVersion = "0.14.0-M5"
  */
-val Http4sVersion = "1.0.0-M21"
+val Http4sVersion = "1.0.0-M38" // Jan 04, 2023
 val CirceVersion = "0.14.0-M5"
 
 /**

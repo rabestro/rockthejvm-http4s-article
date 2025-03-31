@@ -14,7 +14,6 @@ import org.http4s.dsl.impl.{OptionalValidatingQueryParamDecoderMatcher, QueryPar
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Content-Encoding`
 import org.http4s.implicits._
-import org.http4s.server.blaze.BlazeServerBuilder
 import org.typelevel.ci.CIString
 
 import java.time.Year
@@ -125,10 +124,7 @@ object Http4sTutorial extends IOApp {
   private val movieApp = Http4sTutorial.allRoutesComplete[IO]
 
   override def run(args: List[String]): IO[ExitCode] = {
-    EmberServerBuilder
-      .default[IO]
-      .withHost(ipv4"127.0.0.1") //or your host.
-      .withPort(port"8080")
+    EmberServerBuilder.default[IO]
       .withHttpApp(movieApp)
       .build
       .use(_ => IO.never)

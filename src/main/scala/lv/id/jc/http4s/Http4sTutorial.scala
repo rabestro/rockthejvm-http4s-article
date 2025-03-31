@@ -3,7 +3,6 @@ package lv.id.jc.http4s
 import cats.Monad
 import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits._
-import com.comcast.ip4s.IpLiteralSyntax
 import io.circe.generic.auto._
 import io.circe.syntax._
 import lv.id.jc.http4s.Movie.Actor
@@ -15,6 +14,8 @@ import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Content-Encoding`
 import org.http4s.implicits._
 import org.typelevel.ci.CIString
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 import java.time.Year
 import java.util.UUID
@@ -22,6 +23,7 @@ import scala.collection.mutable
 import scala.util.Try
 
 object Http4sTutorial extends IOApp {
+  implicit val logging: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   implicit val yearQueryParamDecoder: QueryParamDecoder[Year] =
     QueryParamDecoder[Int].emap { y =>

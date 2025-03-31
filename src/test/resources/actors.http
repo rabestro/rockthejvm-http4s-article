@@ -1,0 +1,4 @@
+### GET the list of actors of a movie
+GET {{host}}/movies/6bcbca1e-efd3-411d-9f7c-14b872444fce/actors
+
+###

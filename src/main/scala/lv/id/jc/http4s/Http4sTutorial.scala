@@ -18,7 +18,6 @@ import org.typelevel.ci.CIString
 import java.time.Year
 import java.util.UUID
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.global
 import scala.util.Try
 
 object Http4sTutorial extends IOApp {

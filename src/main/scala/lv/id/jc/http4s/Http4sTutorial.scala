@@ -1,7 +1,7 @@
 package lv.id.jc.http4s
 
-import cats._
-import cats.effect._
+import cats.Monad
+import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits._
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -9,8 +9,8 @@ import lv.id.jc.http4s.Movie.Actor
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl._
-import org.http4s.dsl.impl._
-import org.http4s.headers._
+import org.http4s.dsl.impl.{OptionalValidatingQueryParamDecoderMatcher, QueryParamDecoderMatcher}
+import org.http4s.headers.`Content-Encoding`
 import org.http4s.implicits._
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.typelevel.ci.CIString

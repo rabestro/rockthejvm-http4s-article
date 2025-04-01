@@ -22,7 +22,7 @@ import java.util.UUID
 import scala.collection.mutable
 import scala.util.Try
 
-object Http4sTutorial extends IOApp {
+object Main extends IOApp {
   implicit val logging: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   implicit val yearQueryParamDecoder: QueryParamDecoder[Year] =
@@ -123,7 +123,7 @@ object Http4sTutorial extends IOApp {
     allRoutes.orNotFound
   }
 
-  private val movieApp = Http4sTutorial.allRoutesComplete[IO]
+  private val movieApp = Main.allRoutesComplete[IO]
 
   override def run(args: List[String]): IO[ExitCode] = {
     EmberServerBuilder.default[IO]

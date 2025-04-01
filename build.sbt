@@ -4,7 +4,16 @@ ThisBuild / scalaVersion := "2.13.16"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "rockthejvm-http4s-article"
+    name := "rockthejvm-http4s-article",
+    assembly / mainClass := Some("lv.id.jc.http4s.Main"),
+    assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", xs @ _*) =>
+        xs match {
+          case "module-info.class" :: Nil => MergeStrategy.discard
+          case _ => MergeStrategy.discard
+        }
+      case x => MergeStrategy.first
+    }
   )
 
 // https://mvnrepository.com/artifact/org.http4s/http4s-core_3/0.23.30
@@ -22,4 +31,3 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "log4cats-slf4j" % "2.7.0",
   "org.slf4j" % "slf4j-simple" % "2.0.17"
 )
-

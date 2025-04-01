@@ -5,13 +5,12 @@ import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import lv.id.jc.http4s.matcher.YearQueryParamMatcher
+import lv.id.jc.http4s.matcher.{DirectorQueryParamMatcher, DirectorVar, YearQueryParamMatcher}
 import lv.id.jc.http4s.model.Movie.Actor
 import lv.id.jc.http4s.model.{Director, Movie}
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl._
-import org.http4s.dsl.impl.QueryParamDecoderMatcher
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Content-Encoding`
 import org.http4s.implicits._
@@ -21,23 +20,9 @@ import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 import java.util.UUID
 import scala.collection.mutable
-import scala.util.Try
 
 object Main extends IOApp {
   implicit val logging: LoggerFactory[IO] = Slf4jFactory.create[IO]
-
-  object DirectorQueryParamMatcher extends QueryParamDecoderMatcher[String]("director")
-
-  object DirectorVar {
-    def unapply(str: String): Option[Director] = {
-      if (str.nonEmpty && str.matches(".* .*")) {
-        Try {
-          val splitStr = str.split(' ')
-          Director(splitStr(0), splitStr(1))
-        }.toOption
-      } else None
-    }
-  }
 
   val directors: mutable.Map[Actor, Director] =
     mutable.Map("Zack Snyder" -> Director("Zack", "Snyder"))
@@ -78,7 +63,8 @@ object Main extends IOApp {
   private def findMoviesByDirector(director: String): List[Movie] =
     movies.values.filter(_.director == director).toList
 
-  def movieRoutes[F[_] : Monad]: HttpRoutes[F] = {
+  def movieRoutes[F[_] : Monad](implicit logger: LoggerFactory[F]): HttpRoutes[F] = {
+    val log = logger.getLogger
     val dsl = Http4sDsl[F]
     import dsl._
     HttpRoutes.of[F] {
@@ -97,19 +83,23 @@ object Main extends IOApp {
           case None => Ok(movieByDirector.asJson)
         }
       case GET -> Root / "movies" / UUIDVar(movieId) / "actors" =>
-        findMovieById(movieId).map(_.actors) match {
-          case Some(actors) => Ok(actors.asJson)
-          case _ => NotFound(s"No movie with id $movieId found")
+          findMovieById(movieId).map(_.actors) match {
+          case Some(actors) =>
+            log.info(s"Returning actors for movie ID: $movieId") *>
+              Ok(actors.asJson)
+          case _ =>
+            log.warn(s"Movie with ID: $movieId not found") *>
+              NotFound(s"No movie with id $movieId found")
         }
     }
   }
 
-  def allRoutes[F[_] : Concurrent]: HttpRoutes[F] = {
+  def allRoutes[F[_] : Concurrent](implicit logger: LoggerFactory[F]): HttpRoutes[F] = {
     import cats.syntax.semigroupk._
     movieRoutes[F] <+> directorRoutes[F]
   }
 
-  def allRoutesComplete[F[_] : Concurrent]: HttpApp[F] = {
+  def allRoutesComplete[F[_] : Concurrent](implicit logger: LoggerFactory[F]): HttpApp[F] = {
     allRoutes.orNotFound
   }
 

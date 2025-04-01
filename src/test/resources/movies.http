@@ -2,3 +2,5 @@
 GET {{host}}/movies?director=Zack%20Snyder&year=2021
 
 ###
+GET {{host}}/movies?director=Zack%20Snyder
+

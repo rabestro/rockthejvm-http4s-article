@@ -7,7 +7,7 @@ lazy val root = (project in file("."))
     name := "rockthejvm-http4s-article",
     assembly / mainClass := Some("lv.id.jc.http4s.Main"),
     assembly / assemblyMergeStrategy := {
-      case PathList("META-INF", xs @ _*) =>
+      case PathList("META-INF", xs@_*) =>
         xs match {
           case "module-info.class" :: Nil => MergeStrategy.discard
           case _ => MergeStrategy.discard
@@ -29,5 +29,6 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-dsl" % Http4sVersion,
   "io.circe" %% "circe-generic" % CirceVersion,
   "org.typelevel" %% "log4cats-slf4j" % "2.7.0",
-  "org.slf4j" % "slf4j-simple" % "2.0.17"
+  "org.slf4j" % "slf4j-simple" % "2.0.17",
+  "org.scalatest" %% "scalatest" % "3.2.19" % Test,
 )

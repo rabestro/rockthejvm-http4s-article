@@ -5,11 +5,13 @@ import cats.effect.{Concurrent, ExitCode, IO, IOApp}
 import cats.implicits._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import lv.id.jc.http4s.Movie.Actor
+import lv.id.jc.http4s.matcher.YearQueryParamMatcher
+import lv.id.jc.http4s.model.Movie.Actor
+import lv.id.jc.http4s.model.{Director, Movie}
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl._
-import org.http4s.dsl.impl.{OptionalValidatingQueryParamDecoderMatcher, QueryParamDecoderMatcher}
+import org.http4s.dsl.impl.QueryParamDecoderMatcher
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Content-Encoding`
 import org.http4s.implicits._
@@ -17,24 +19,12 @@ import org.typelevel.ci.CIString
 import org.typelevel.log4cats.LoggerFactory
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 
-import java.time.Year
 import java.util.UUID
 import scala.collection.mutable
 import scala.util.Try
 
 object Main extends IOApp {
   implicit val logging: LoggerFactory[IO] = Slf4jFactory.create[IO]
-
-  implicit val yearQueryParamDecoder: QueryParamDecoder[Year] =
-    QueryParamDecoder[Int].emap { y =>
-      Try(Year.of(y))
-        .toEither
-        .leftMap { tr =>
-          ParseFailure(tr.getMessage, tr.getMessage)
-        }
-    }
-
-  object YearQueryParamMatcher extends OptionalValidatingQueryParamDecoderMatcher[Year]("year")
 
   object DirectorQueryParamMatcher extends QueryParamDecoderMatcher[String]("director")
 

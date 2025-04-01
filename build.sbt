@@ -18,10 +18,10 @@ lazy val root = (project in file("."))
 
 // https://mvnrepository.com/artifact/org.http4s/http4s-core_3/0.23.30
 // https://mvnrepository.com/artifact/org.http4s/http4s-core_3/1.0.0-M44
-val Http4sVersion = "1.0.0-M44" // Dec 06, 2024
+val Http4sVersion = "1.0.0-M44"
 
 // https://mvnrepository.com/artifact/io.circe/circe-core
-val CirceVersion = "0.14.12" // Mar 16, 2025
+val CirceVersion = "0.14.12"
 
 libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-ember-server" % Http4sVersion,

@@ -15,7 +15,7 @@ import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.headers.`Content-Encoding`
 import org.http4s.implicits._
 import org.typelevel.ci.CIString
-import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.{LoggerFactory, SelfAwareStructuredLogger}
 import org.typelevel.log4cats.slf4j.Slf4jFactory
 
 import java.util.UUID
@@ -27,19 +27,28 @@ object Main extends IOApp {
   val directors: mutable.Map[Actor, Director] =
     mutable.Map("Zack Snyder" -> Director("Zack", "Snyder"))
 
-  def directorRoutes[F[_] : Concurrent]: HttpRoutes[F] = {
+  def directorRoutes[F[_]: Concurrent](implicit logger: LoggerFactory[F]): HttpRoutes[F] = {
+    val log = logger.getLogger
     val dsl = Http4sDsl[F]
     import dsl._
+
     implicit val directorDecoder: EntityDecoder[F, Director] = jsonOf[F, Director]
+
     HttpRoutes.of[F] {
       case GET -> Root / "directors" / DirectorVar(director) =>
-        directors.get(director.toString) match {
-          case Some(dir) => Ok(dir.asJson, Header.Raw(CIString("My-Custom-Header"), "value"))
-          case _ => NotFound(s"No director called $director found")
+          directors.get(director.toString) match {
+          case Some(dir) =>
+            log.info(s"Found director: ${dir.firstName} ${dir.lastName}") *>
+              Ok(dir.asJson, Header.Raw(CIString("My-Custom-Header"), "value"))
+          case None =>
+            log.warn(s"No director called $director found") *>
+              NotFound(s"No director called $director found")
         }
+
       case req@POST -> Root / "directors" =>
         for {
           director <- req.as[Director]
+          _ <- log.info(s"Adding director: ${director.firstName} ${director.lastName}")
           _ = directors.put(director.toString, director)
           res <- Ok.headers(`Content-Encoding`(ContentCoding.gzip))
             .map(_.addCookie(ResponseCookie("My-Cookie", "value")))
@@ -103,7 +112,7 @@ object Main extends IOApp {
     allRoutes.orNotFound
   }
 
-  private val movieApp = Main.allRoutesComplete[IO]
+  private val movieApp = allRoutesComplete[IO]
 
   override def run(args: List[String]): IO[ExitCode] = {
     EmberServerBuilder.default[IO]
